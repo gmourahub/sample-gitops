@@ -171,6 +171,7 @@ spec:
                 --builder $BUILDER_IMAGE \
                 --path $BUILD_PATH \
                 --docker-host inherit \
+                --network host \
                 $ENV_ARGS
 
             # Save image to tarball for next step

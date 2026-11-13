@@ -252,7 +252,7 @@ spec:
             #####################################################################
             # 3. Build the image
             #####################################################################
-            podman build -t $IMAGE -f /mnt/vol/Dockerfile /mnt/vol
+            podman build --network host -t $IMAGE -f /mnt/vol/Dockerfile /mnt/vol
             podman save -o /mnt/vol/app-image.tar $IMAGE
 
             echo "Image built successfully: $IMAGE"
