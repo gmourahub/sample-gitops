@@ -159,7 +159,7 @@ spec:
             #####################################################################
             # 2.  Docker Build
             #####################################################################
-            podman build -t $IMAGE -f $WORKDIR/$DOCKERFILE_PATH $WORKDIR/$DOCKER_CONTEXT
+            podman build --network host -t $IMAGE -f $WORKDIR/$DOCKERFILE_PATH $WORKDIR/$DOCKER_CONTEXT
             podman save -o /mnt/vol/app-image.tar $IMAGE
         securityContext:
           privileged: true
