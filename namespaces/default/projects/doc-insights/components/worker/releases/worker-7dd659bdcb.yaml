@@ -1,0 +1,208 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ComponentRelease
+metadata:
+  name: worker-7dd659bdcb
+  namespace: default
+spec:
+  componentType:
+    kind: ClusterComponentType
+    name: deployment/worker
+    spec:
+      allowedTraits:
+      - kind: ClusterTrait
+        name: health-probes
+      - kind: ClusterTrait
+        name: horizontal-pod-autoscaler
+      - kind: ClusterTrait
+        name: observability-alert-rule
+      - kind: ClusterTrait
+        name: persistent-volume-claim
+      - kind: ClusterTrait
+        name: vertical-pod-autoscaler
+      allowedWorkflows:
+      - kind: ClusterWorkflow
+        name: paketo-buildpacks-builder
+      - kind: ClusterWorkflow
+        name: gcp-buildpacks-builder
+      - kind: ClusterWorkflow
+        name: dockerfile-builder
+      - kind: ClusterWorkflow
+        name: ballerina-buildpack-builder
+      environmentConfigs:
+        openAPIV3Schema:
+          $defs:
+            ResourceQuantity:
+              default: {}
+              properties:
+                cpu:
+                  default: 100m
+                  type: string
+                memory:
+                  default: 256Mi
+                  type: string
+              type: object
+            ResourceRequirements:
+              default: {}
+              properties:
+                limits:
+                  $ref: '#/$defs/ResourceQuantity'
+                requests:
+                  $ref: '#/$defs/ResourceQuantity'
+              type: object
+          properties:
+            imagePullPolicy:
+              default: IfNotPresent
+              enum:
+              - Always
+              - IfNotPresent
+              - Never
+              type: string
+            replicas:
+              default: 1
+              minimum: 0
+              type: integer
+            resources:
+              $ref: '#/$defs/ResourceRequirements'
+          type: object
+      resources:
+      - id: deployment
+        targetPlane: dataplane
+        template:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            labels: ${metadata.labels}
+            name: ${metadata.name}
+            namespace: ${metadata.namespace}
+          spec:
+            replicas: ${environmentConfigs.replicas}
+            selector:
+              matchLabels: ${metadata.podSelectors}
+            template:
+              metadata:
+                labels: ${metadata.podSelectors}
+              spec:
+                containers:
+                - args: |
+                    ${has(workload.container.args) ? workload.container.args : oc_omit()}
+                  command: |
+                    ${has(workload.container.command) ? workload.container.command : oc_omit()}
+                  env: ${dependencies.toContainerEnvs()}
+                  envFrom: ${configurations.toContainerEnvFrom()}
+                  image: ${workload.container.image}
+                  imagePullPolicy: ${environmentConfigs.imagePullPolicy}
+                  name: main
+                  resources:
+                    limits:
+                      cpu: ${environmentConfigs.resources.limits.cpu}
+                      memory: ${environmentConfigs.resources.limits.memory}
+                    requests:
+                      cpu: ${environmentConfigs.resources.requests.cpu}
+                      memory: ${environmentConfigs.resources.requests.memory}
+                  volumeMounts: ${configurations.toContainerVolumeMounts() + dependencies.toContainerVolumeMounts()}
+                volumes: ${configurations.toVolumes() + dependencies.toVolumes()}
+      - forEach: ${configurations.toConfigEnvsByContainer()}
+        id: env-config
+        targetPlane: dataplane
+        template:
+          apiVersion: v1
+          data: |
+            ${envConfig.envs.transformMapEntry(index, env, {env.name: env.value})}
+          kind: ConfigMap
+          metadata:
+            name: ${envConfig.resourceName}
+            namespace: ${metadata.namespace}
+        var: envConfig
+      - forEach: ${configurations.toConfigFileList()}
+        id: file-config
+        targetPlane: dataplane
+        template:
+          apiVersion: v1
+          data:
+            ${config.name}: |
+              ${config.value}
+          kind: ConfigMap
+          metadata:
+            name: ${config.resourceName}
+            namespace: ${metadata.namespace}
+        var: config
+      - forEach: ${configurations.toSecretEnvsByContainer()}
+        id: secret-env-external
+        targetPlane: dataplane
+        template:
+          apiVersion: external-secrets.io/v1
+          kind: ExternalSecret
+          metadata:
+            name: ${secretEnv.resourceName}
+            namespace: ${metadata.namespace}
+          spec:
+            data: |
+              ${secretEnv.envs.map(secret, {
+                "secretKey": secret.name,
+                "remoteRef": {
+                  "key": secret.remoteRef.key,
+                  ?"property": secret.remoteRef.?property
+                }
+              })}
+            refreshInterval: 15s
+            secretStoreRef:
+              kind: ClusterSecretStore
+              name: ${dataplane.secretStore}
+            target:
+              creationPolicy: Owner
+              name: ${secretEnv.resourceName}
+        var: secretEnv
+      - forEach: ${configurations.toSecretFileList()}
+        id: secret-file-external
+        targetPlane: dataplane
+        template:
+          apiVersion: external-secrets.io/v1
+          kind: ExternalSecret
+          metadata:
+            name: ${file.resourceName}
+            namespace: ${metadata.namespace}
+          spec:
+            data:
+            - remoteRef:
+                key: ${file.remoteRef.key}
+                property: |
+                  ${has(file.remoteRef.property) ? file.remoteRef.property : oc_omit()}
+              secretKey: ${file.name}
+            refreshInterval: 15s
+            secretStoreRef:
+              kind: ClusterSecretStore
+              name: ${dataplane.secretStore}
+            target:
+              creationPolicy: Owner
+              name: ${file.resourceName}
+        var: file
+      validations:
+      - message: Worker components must not have endpoints. Use 'deployment/service'
+          for components with endpoints.
+        rule: ${size(workload.endpoints) == 0}
+      workloadType: deployment
+  owner:
+    componentName: worker
+    projectName: doc-insights
+  workload:
+    container:
+      command:
+      - node
+      - worker.js
+      env:
+      - key: PROCESSING_DELAY_MS
+        value: "3000"
+      image: 000000000000.dkr.ecr.us-east-1.localhost:4566/doc-insights-backend:20261108-213045
+    dependencies:
+      resources:
+      - envBindings:
+          accessKeyId: AWS_ACCESS_KEY_ID
+          bucket: S3_BUCKET
+          endpoint: S3_ENDPOINT
+          region: AWS_REGION
+          secretAccessKey: AWS_SECRET_ACCESS_KEY
+        ref: docs-bucket
+      - envBindings:
+          endpoint: SQS_ENDPOINT
+          queueName: SQS_QUEUE_NAME
+        ref: docs-queue

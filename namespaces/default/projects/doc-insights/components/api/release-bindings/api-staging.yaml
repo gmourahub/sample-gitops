@@ -1,0 +1,25 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  labels:
+    openchoreo.dev/component: api
+    openchoreo.dev/project: doc-insights
+  name: api-staging
+  namespace: default
+spec:
+  environment: staging
+  owner:
+    componentName: api
+    projectName: doc-insights
+  releaseName: api-5cdd9c57d6
+  state: Active
+  traitEnvironmentConfigs:
+    api-error-log-alert:
+      actions:
+        incident:
+          enabled: true
+          triggerAiRca: true
+        notifications:
+          channels:
+          - doc-insights-staging
+      enabled: true

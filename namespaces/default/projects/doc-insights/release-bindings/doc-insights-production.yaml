@@ -1,0 +1,11 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ProjectReleaseBinding
+metadata:
+  labels:
+    openchoreo.dev/project: doc-insights
+  name: doc-insights-production
+  namespace: default
+spec:
+  environment: production
+  owner:
+    projectName: doc-insights

@@ -1,0 +1,30 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  labels:
+    openchoreo.dev/component: frontend
+    openchoreo.dev/project: doc-insights
+  name: frontend-development
+  namespace: default
+spec:
+  componentTypeEnvironmentConfigs:
+    imagePullPolicy: IfNotPresent
+    replicas: 1
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+  environment: development
+  owner:
+    componentName: frontend
+    projectName: doc-insights
+  releaseName: frontend-8575977d6f
+  state: Active
+  workloadOverrides:
+    container:
+      env:
+      - key: VAR1
+        value: valor1

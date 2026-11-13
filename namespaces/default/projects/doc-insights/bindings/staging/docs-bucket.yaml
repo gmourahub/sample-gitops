@@ -1,0 +1,14 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ResourceReleaseBinding
+metadata:
+  labels:
+    openchoreo.dev/project: doc-insights
+    openchoreo.dev/resource: docs-bucket
+  name: docs-bucket-staging
+  namespace: default
+spec:
+  environment: staging
+  owner:
+    projectName: doc-insights
+    resourceName: docs-bucket
+  resourceRelease: docs-bucket-654dfcd5d5

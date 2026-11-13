@@ -1,0 +1,11 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Resource
+metadata:
+  name: docs-bucket
+  namespace: default
+spec:
+  owner:
+    projectName: doc-insights
+  type:
+    kind: ClusterResourceType
+    name: aws-s3-bucket

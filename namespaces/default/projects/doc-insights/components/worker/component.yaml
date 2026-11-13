@@ -1,0 +1,12 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: worker
+  namespace: default
+spec:
+  autoDeploy: false
+  componentType:
+    kind: ClusterComponentType
+    name: deployment/worker
+  owner:
+    projectName: doc-insights

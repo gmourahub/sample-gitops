@@ -1,0 +1,22 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  name: api-development
+  namespace: default
+spec:
+  environment: development
+  owner:
+    componentName: api
+    projectName: doc-insights
+  releaseName: api-5cdd9c57d6
+  state: Active
+  traitEnvironmentConfigs:
+    api-error-log-alert:
+      actions:
+        incident:
+          enabled: true
+          triggerAiRca: true
+        notifications:
+          channels:
+          - doc-insights-development
+      enabled: true

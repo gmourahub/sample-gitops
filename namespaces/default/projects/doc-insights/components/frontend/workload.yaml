@@ -1,0 +1,26 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workload
+metadata:
+  name: frontend
+  namespace: default
+spec:
+  container:
+    image: 000000000000.dkr.ecr.us-east-1.localhost:4566/doc-insights-frontend:20261108-213045
+  dependencies:
+    endpoints:
+    - component: api
+      envBindings:
+        host: API_HOST
+        port: API_PORT
+      name: http
+      project: doc-insights
+      visibility: project
+  endpoints:
+    http:
+      port: 8080
+      type: HTTP
+      visibility:
+      - external
+  owner:
+    componentName: frontend
+    projectName: doc-insights

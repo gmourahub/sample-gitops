@@ -1,0 +1,102 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ResourceRelease
+metadata:
+  name: docs-queue-78ff4f74d9
+  namespace: default
+spec:
+  owner:
+    projectName: doc-insights
+    resourceName: docs-queue
+  parameters:
+    visibilityTimeoutSeconds: 30
+  resourceType:
+    kind: ClusterResourceType
+    name: aws-sqs-queue
+    spec:
+      environmentConfigs:
+        openAPIV3Schema:
+          properties:
+            endpoint:
+              default: http://floci.internal:4566
+              type: string
+            region:
+              default: us-east-1
+              type: string
+          type: object
+      outputs:
+      - name: queueName
+        value: ${metadata.resourceNamespace}-${metadata.resourceName}-${metadata.environmentName}
+      - name: endpoint
+        value: ${environmentConfigs.endpoint}
+      - name: region
+        value: ${environmentConfigs.region}
+      - name: accessKeyId
+        secretKeyRef:
+          key: accessKeyId
+          name: ${metadata.name}-aws
+      - name: secretAccessKey
+        secretKeyRef:
+          key: secretAccessKey
+          name: ${metadata.name}-aws
+      parameters:
+        openAPIV3Schema:
+          properties:
+            visibilityTimeoutSeconds:
+              default: 30
+              type: integer
+          type: object
+      resources:
+      - id: credentials
+        template:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            labels: ${metadata.labels}
+            name: ${metadata.name}-aws
+            namespace: ${metadata.namespace}
+          stringData:
+            accessKeyId: test
+            secretAccessKey: test
+          type: Opaque
+      - id: provision
+        template:
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            labels: ${metadata.labels}
+            name: ${metadata.name}-provision
+            namespace: ${metadata.namespace}
+          spec:
+            backoffLimit: 10
+            template:
+              spec:
+                containers:
+                - args:
+                  - aws sqs create-queue --queue-name "$QUEUE" --attributes VisibilityTimeout="$VISIBILITY_TIMEOUT"
+                    && echo "queue $QUEUE ready"
+                  command:
+                  - sh
+                  - -c
+                  env:
+                  - name: QUEUE
+                    value: ${metadata.resourceNamespace}-${metadata.resourceName}-${metadata.environmentName}
+                  - name: VISIBILITY_TIMEOUT
+                    value: ${string(parameters.visibilityTimeoutSeconds)}
+                  - name: AWS_ENDPOINT_URL
+                    value: ${environmentConfigs.endpoint}
+                  - name: AWS_DEFAULT_REGION
+                    value: ${environmentConfigs.region}
+                  - name: AWS_ACCESS_KEY_ID
+                    valueFrom:
+                      secretKeyRef:
+                        key: accessKeyId
+                        name: ${metadata.name}-aws
+                  - name: AWS_SECRET_ACCESS_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        key: secretAccessKey
+                        name: ${metadata.name}-aws
+                  image: amazon/aws-cli:2.27.0
+                  name: aws
+                restartPolicy: OnFailure
+      retainPolicy: Delete

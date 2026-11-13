@@ -1,0 +1,18 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Project
+metadata:
+  annotations:
+    openchoreo.dev/description: Envia textos para o S3, processa via fila SQS e mostra
+      estatísticas
+    openchoreo.dev/display-name: Doc Insights
+  labels:
+    openchoreo.dev/name: doc-insights
+  name: doc-insights
+  namespace: default
+spec:
+  deploymentPipelineRef:
+    kind: DeploymentPipeline
+    name: default
+  type:
+    kind: ClusterProjectType
+    name: default

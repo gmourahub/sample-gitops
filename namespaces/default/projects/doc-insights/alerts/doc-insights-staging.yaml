@@ -1,0 +1,16 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ObservabilityAlertsNotificationChannel
+metadata:
+  name: doc-insights-staging
+  namespace: default
+spec:
+  environment: staging
+  isEnvDefault: true
+  type: webhook
+  webhookConfig:
+    headers:
+      Content-Type:
+        value: application/json
+    payloadTemplate: |
+      {"text": "[${alertSeverity}] ${alertName} on ${component} (${environment}): ${alertDescription}"}
+    url: http://webhook.example.invalid/doc-insights
