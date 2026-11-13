@@ -8,6 +8,7 @@ spec:
     projectName: doclet
     resourceName: doclet-postgres
   environment: development
+  resourceRelease: doclet-postgres-78d95c5fcb
   retainPolicy: Delete
   resourceTypeEnvironmentConfigs:
     adminEnabled: false

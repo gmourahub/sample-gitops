@@ -1,0 +1,167 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ResourceRelease
+metadata:
+  name: doclet-nats-844b9c778f
+  namespace: default
+spec:
+  owner:
+    projectName: doclet
+    resourceName: doclet-nats
+  resourceType:
+    kind: ClusterResourceType
+    name: nats
+    spec:
+      environmentConfigs:
+        openAPIV3Schema:
+          properties:
+            adminEnabled:
+              default: false
+              type: boolean
+            memory:
+              default: 64Mi
+              type: string
+          type: object
+      outputs:
+      - name: host
+        value: ${metadata.name}.${metadata.namespace}.svc.cluster.local
+      - name: port
+        value: "4222"
+      - name: token
+        secretKeyRef:
+          key: password
+          name: ${metadata.name}-creds
+      - name: url
+        secretKeyRef:
+          key: url
+          name: ${metadata.name}-creds
+      - name: adminURL
+        value: |-
+          ${environmentConfigs.adminEnabled
+            ? (has(gateway.ingress.external.https)
+                ? "https://" + metadata.resourceName + "-admin-" + metadata.environmentName + "-" + metadata.resourceNamespace + "." + gateway.ingress.external.https.host + ":" + string(gateway.ingress.external.https.port) + "/"
+                : has(gateway.ingress.external.http)
+                    ? "http://" + metadata.resourceName + "-admin-" + metadata.environmentName + "-" + metadata.resourceNamespace + "." + gateway.ingress.external.http.host + ":" + string(gateway.ingress.external.http.port) + "/"
+                    : "no-gateway-configured")
+            : "disabled"}
+      resources:
+      - id: password-generator
+        template:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: Password
+          metadata:
+            labels: ${metadata.labels}
+            name: ${metadata.name}-creds
+            namespace: ${metadata.namespace}
+          spec:
+            allowRepeat: true
+            digits: 8
+            length: 32
+            noUpper: false
+            symbols: 0
+      - id: creds
+        template:
+          apiVersion: external-secrets.io/v1
+          kind: ExternalSecret
+          metadata:
+            labels: ${metadata.labels}
+            name: ${metadata.name}-creds
+            namespace: ${metadata.namespace}
+          spec:
+            dataFrom:
+            - sourceRef:
+                generatorRef:
+                  apiVersion: generators.external-secrets.io/v1alpha1
+                  kind: Password
+                  name: ${metadata.name}-creds
+            refreshInterval: "0"
+            target:
+              creationPolicy: Owner
+              name: ${metadata.name}-creds
+              template:
+                data:
+                  password: '{{ .password }}'
+                  url: nats://{{ .password }}@${metadata.name}.${metadata.namespace}.svc.cluster.local:4222
+                type: Opaque
+      - id: service
+        template:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            labels: ${metadata.labels}
+            name: ${metadata.name}
+            namespace: ${metadata.namespace}
+          spec:
+            ports:
+            - name: client
+              port: 4222
+              targetPort: 4222
+            - name: monitor
+              port: 8222
+              targetPort: 8222
+            selector:
+              app: ${metadata.name}
+      - id: deployment
+        readyWhen: ${has(applied.deployment.status.readyReplicas) && has(applied.deployment.status.replicas)
+          && applied.deployment.status.readyReplicas == applied.deployment.status.replicas
+          && applied.deployment.status.replicas > 0}
+        template:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            labels: ${metadata.labels}
+            name: ${metadata.name}
+            namespace: ${metadata.namespace}
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: ${metadata.name}
+            template:
+              metadata:
+                labels:
+                  app: ${metadata.name}
+              spec:
+                containers:
+                - args:
+                  - --http_port
+                  - "8222"
+                  - --auth
+                  - $(NATS_TOKEN)
+                  env:
+                  - name: NATS_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        key: password
+                        name: ${metadata.name}-creds
+                  image: nats:2.10-alpine
+                  name: nats
+                  ports:
+                  - containerPort: 4222
+                    name: client
+                  - containerPort: 8222
+                    name: monitor
+                  resources:
+                    limits:
+                      memory: ${environmentConfigs.memory}
+      - id: admin-route
+        includeWhen: ${environmentConfigs.adminEnabled && has(gateway.ingress.external)}
+        template:
+          apiVersion: gateway.networking.k8s.io/v1
+          kind: HTTPRoute
+          metadata:
+            labels: ${metadata.labels}
+            name: ${metadata.name}-admin
+            namespace: ${metadata.namespace}
+          spec:
+            hostnames: |
+              ${[gateway.ingress.external.?http, gateway.ingress.external.?https]
+                .filter(g, g.hasValue()).map(g, g.value().host).distinct()
+                .map(h, metadata.resourceName + "-admin-" + metadata.environmentName + "-" + metadata.resourceNamespace + "." + h)}
+            parentRefs:
+            - name: ${gateway.ingress.external.name}
+              namespace: ${gateway.ingress.external.namespace}
+            rules:
+            - backendRefs:
+              - name: ${metadata.name}
+                port: 8222
+      retainPolicy: Delete
