@@ -1,0 +1,11 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  name: doclet-frontend-development
+  namespace: default
+spec:
+  environment: development
+  owner:
+    componentName: doclet-frontend
+    projectName: doclet
+  releaseName: doclet-frontend-0b8ae2b1
