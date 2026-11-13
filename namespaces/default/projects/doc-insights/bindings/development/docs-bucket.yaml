@@ -1,0 +1,12 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ResourceReleaseBinding
+metadata:
+  name: docs-bucket-development
+  namespace: default
+spec:
+  environment: development
+  owner:
+    projectName: doc-insights
+    resourceName: docs-bucket
+  resourceRelease: docs-bucket-654dfcd5d5
+  retainPolicy: Delete

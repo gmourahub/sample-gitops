@@ -1,0 +1,12 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  name: worker-development
+  namespace: default
+spec:
+  environment: development
+  owner:
+    componentName: worker
+    projectName: doc-insights
+  releaseName: worker-7dd659bdcb
+  state: Active

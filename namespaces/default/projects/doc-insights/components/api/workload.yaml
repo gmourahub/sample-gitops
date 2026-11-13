@@ -1,0 +1,34 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workload
+metadata:
+  name: api
+  namespace: default
+spec:
+  container:
+    command:
+    - node
+    - api.js
+    env:
+    - key: PORT
+      value: "8080"
+    image: 000000000000.dkr.ecr.us-east-1.localhost:4566/doc-insights-backend:20261108-213045
+  dependencies:
+    resources:
+    - envBindings:
+        accessKeyId: AWS_ACCESS_KEY_ID
+        bucket: S3_BUCKET
+        endpoint: S3_ENDPOINT
+        region: AWS_REGION
+        secretAccessKey: AWS_SECRET_ACCESS_KEY
+      ref: docs-bucket
+    - envBindings:
+        endpoint: SQS_ENDPOINT
+        queueName: SQS_QUEUE_NAME
+      ref: docs-queue
+  endpoints:
+    http:
+      port: 8080
+      type: HTTP
+  owner:
+    componentName: api
+    projectName: doc-insights

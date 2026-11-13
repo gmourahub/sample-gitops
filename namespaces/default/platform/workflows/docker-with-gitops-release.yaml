@@ -98,7 +98,7 @@ spec:
             value: ${parameters.docker.filePath}
           # PE-controlled hardcoded parameters
           - name: gitops-repo-url
-            value: https://github.com/openchoreo/sample-gitops # Replace with your gitops repository URL
+            value: https://github.com/gmourahub/sample-gitops
           - name: gitops-branch
             value: main
           # GitOps git secret (for private repos and PR creation)
@@ -108,7 +108,7 @@ spec:
             value: ${parameters.workloadDescriptorPath}
           # PE-controlled hardcoded parameters
           - name: registry-url
-            value: host.k3d.internal:10082
+            value: 000000000000.dkr.ecr.us-east-1.localhost:4566 # Floci ECR (the k3s node pulls from it)
           - name: image-name
             value: ${parameters.projectName}-${parameters.componentName}-image
           - name: image-tag

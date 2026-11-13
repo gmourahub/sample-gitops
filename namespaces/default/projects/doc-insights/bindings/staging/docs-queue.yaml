@@ -1,0 +1,14 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ResourceReleaseBinding
+metadata:
+  labels:
+    openchoreo.dev/project: doc-insights
+    openchoreo.dev/resource: docs-queue
+  name: docs-queue-staging
+  namespace: default
+spec:
+  environment: staging
+  owner:
+    projectName: doc-insights
+    resourceName: docs-queue
+  resourceRelease: docs-queue-78ff4f74d9

@@ -1,7 +1,7 @@
 apiVersion: openchoreo.dev/v1alpha1
 kind: Workload
 metadata:
-  name: frontend-workload
+  name: doclet-frontend-workload
   namespace: default
 spec:
   container:
@@ -24,5 +24,5 @@ spec:
         envBindings:
           address: COLLAB_SERVICE_URL
   owner:
-    componentName: frontend
+    componentName: doclet-frontend
     projectName: doclet

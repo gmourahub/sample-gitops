@@ -1,0 +1,13 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Resource
+metadata:
+  name: docs-queue
+  namespace: default
+spec:
+  owner:
+    projectName: doc-insights
+  parameters:
+    visibilityTimeoutSeconds: 30
+  type:
+    kind: ClusterResourceType
+    name: aws-sqs-queue

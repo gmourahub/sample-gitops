@@ -1,0 +1,15 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  labels:
+    openchoreo.dev/component: frontend
+    openchoreo.dev/project: doc-insights
+  name: frontend-staging
+  namespace: default
+spec:
+  environment: staging
+  owner:
+    componentName: frontend
+    projectName: doc-insights
+  releaseName: frontend-8575977d6f
+  state: Active

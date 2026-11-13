@@ -1,0 +1,27 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: api
+  namespace: default
+spec:
+  autoDeploy: false
+  componentType:
+    kind: ClusterComponentType
+    name: deployment/service
+  owner:
+    projectName: doc-insights
+  traits:
+  - instanceName: api-error-log-alert
+    kind: ClusterTrait
+    name: observability-alert-rule
+    parameters:
+      condition:
+        interval: 1m
+        operator: gt
+        threshold: 2
+        window: 1m
+      description: api is logging errors (failed S3/SQS calls, 5xx responses)
+      severity: critical
+      source:
+        query: error
+        type: log

@@ -1,0 +1,12 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ResourceReleaseBinding
+metadata:
+  name: docs-queue-development
+  namespace: default
+spec:
+  environment: development
+  owner:
+    projectName: doc-insights
+    resourceName: docs-queue
+  resourceRelease: docs-queue-78ff4f74d9
+  retainPolicy: Delete

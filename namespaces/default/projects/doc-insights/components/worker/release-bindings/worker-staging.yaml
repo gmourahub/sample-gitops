@@ -1,0 +1,15 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: ReleaseBinding
+metadata:
+  labels:
+    openchoreo.dev/component: worker
+    openchoreo.dev/project: doc-insights
+  name: worker-staging
+  namespace: default
+spec:
+  environment: staging
+  owner:
+    componentName: worker
+    projectName: doc-insights
+  releaseName: worker-7dd659bdcb
+  state: Active

@@ -1,7 +1,7 @@
 apiVersion: openchoreo.dev/v1alpha1
 kind: Component
 metadata:
-  name: frontend
+  name: doclet-frontend
   namespace: default
 spec:
   owner:
@@ -16,7 +16,7 @@ spec:
     name: docker-gitops-release
     kind: Workflow
     parameters:
-      componentName: "frontend"
+      componentName: "doclet-frontend"
       projectName: "doclet"
       repository:
         url: "https://github.com/openchoreo/sample-workloads.git"
