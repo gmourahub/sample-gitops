@@ -115,6 +115,8 @@ Choose a CD tool to get started with a complete end-to-end tutorial:
 | CD Tool     | Tutorial                                | Status    |
 |-------------|-----------------------------------------|-----------|
 | **Flux CD** | [GitOps with Flux CD](./flux/README.md) | Available |
-| **Argo CD** | [GitOps with Argo CD](./argocd/README.md) | Available (this fork) |
+| **Argo CD** | Coming soon                             | Planned   |
+
+> This fork is synced by Flux on a local Floci cluster, with a few adaptations: see [flux/FLOCI.md](./flux/FLOCI.md).
 
 Each tutorial walks you through forking this repository, configuring the CD tool, building and deploying the sample Doclet application, and promoting components across environments.
