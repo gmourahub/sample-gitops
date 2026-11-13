@@ -8,16 +8,16 @@ spec:
     env:
     - key: DOCLET_COLLAB_ADDR
       value: :8090
-    image: temp-image-placeholder
-  endpoints:
-    http:
-      type: HTTP
-      port: 8090
+    image: 000000000000.dkr.ecr.us-east-1.localhost:4566/doclet-collab-svc-image:v1-0b8ae2b1
   dependencies:
     resources:
-      - ref: doclet-nats
-        envBindings:
-          url: DOCLET_NATS_URL
+    - envBindings:
+        url: DOCLET_NATS_URL
+      ref: doclet-nats
+  endpoints:
+    http:
+      port: 8090
+      type: HTTP
   owner:
     componentName: collab-svc
     projectName: doclet
