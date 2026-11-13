@@ -8,6 +8,7 @@ spec:
     projectName: doclet
     resourceName: doclet-nats
   environment: development
+  resourceRelease: doclet-nats-844b9c778f
   retainPolicy: Delete
   resourceTypeEnvironmentConfigs:
     adminEnabled: false
