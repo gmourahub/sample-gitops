@@ -8,7 +8,7 @@ spec:
     env:
     - key: DOCLET_COLLAB_ADDR
       value: :8090
-    image: 000000000000.dkr.ecr.us-east-1.localhost:4566/doclet-collab-svc-image:v1-0b8ae2b1
+    image: 000000000000.dkr.ecr.us-east-1.localhost:4566/doclet-collab-svc-image:v1-19a03d18
   dependencies:
     resources:
     - envBindings:
