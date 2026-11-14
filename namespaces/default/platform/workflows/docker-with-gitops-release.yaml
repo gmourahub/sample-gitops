@@ -45,6 +45,7 @@ spec:
                   description: "Git branch to checkout"
                 commit:
                   type: string
+                  default: ""
                   description: "Git commit SHA or reference (optional, defaults to latest)"
             appPath:
               type: string
